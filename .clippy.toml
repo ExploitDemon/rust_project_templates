@@ -1,8 +1,3 @@
-# Clippy configuration file
-# You can enable or disable lints, and configure specific linting rules
+# Clippy# .clippy.toml
+cognitive-complexity-threshold = 10
 
-# Disable a specific lint
-blacklisted-name = "allow"
-
-# Set the cyclomatic complexity that you consider acceptable in your code
-cyclomatic-complexity-threshold = 10
