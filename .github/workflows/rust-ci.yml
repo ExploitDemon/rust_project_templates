@@ -12,50 +12,6 @@ jobs:
   setup:
     runs-on: arch-latest
     steps:
-      - name: Setup Rust
-        uses: actions/checkout@v2
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
-
-  build:
-    needs: setup
-    runs-on: arch-latest
-    steps:
-      - name: Build
-        run: cargo build --verbose
-
-  test:
-    needs: build
-    runs-on: arch-latest
-    steps:
-      - name: Test
-        run: cargo test --verbose
-
-  lint:
-    needs: test
-    runs-on: arch-latest
-    steps:
-      - name: Clippy
-        run: cargo clippy --verbose -D warnings
-      - name: Rustfmt
-        run: cargo fmt -- --check
-
-  audit:
-    needs: lint
-name: Rust CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  setup:
-    runs-on: arch-latest
-    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -105,4 +61,3 @@ jobs:
     steps:
       - name: Audit
         run: cargo audit --verbose
-
