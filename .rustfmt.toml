@@ -1,0 +1,11 @@
+# Rustfmt configuration file
+# You can customize the formatting rules
+
+# Set the maximum line width
+max_width = 100
+
+# Enforce trailing commas in multi-line lists
+trailing_comma = "Always"
+
+# Use Unix-style line endings
+newline_style = "Unix"
