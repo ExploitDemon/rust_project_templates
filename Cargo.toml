@@ -1,9 +1,10 @@
 [package]
-name = "PROJECT_NAME"
+name = "{{project-name}}"
 version = "0.1.0"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["{{authors}}"]
 edition = "2021"
-description = "DESCRIPTION"
-license = "MIT OR Apache-2.0"
+description = "{{description}}"
+license = "{{license}}"
 
 [dependencies]
+
