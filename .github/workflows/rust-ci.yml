@@ -10,7 +10,11 @@ on:
 
 jobs:
   setup:
-    runs-on: arch-latest
+    runs-on: ubuntu-latest  # Use the default GitHub runner
+
+    container:
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,21 +31,33 @@ jobs:
 
   build:
     needs: setup
-    runs-on: arch-latest
+    runs-on: ubuntu-latest  # Use the default GitHub runner
+
+    container:
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
+
     steps:
       - name: Build
         run: cargo build --verbose
 
   test:
     needs: build
-    runs-on: arch-latest
+    runs-on: ubuntu-latest  # Use the default GitHub runner
+
+    container:
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
+
     steps:
       - name: Test
         run: cargo test --verbose
 
   lint:
     needs: test
-    runs-on: arch-latest
+    runs-on: ubuntu-latest  # Use the default GitHub runner
+
+    container:
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
+
     steps:
       - name: Clippy
         run: cargo clippy --verbose -- -D warnings
@@ -57,7 +73,11 @@ jobs:
 
   audit:
     needs: lint
-    runs-on: arch-latest
+    runs-on: ubuntu-latest  # Use the default GitHub runner
+
+    container:
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
+
     steps:
       - name: Audit
         run: cargo audit --verbose
