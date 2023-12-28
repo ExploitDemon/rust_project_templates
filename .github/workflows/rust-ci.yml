@@ -10,14 +10,23 @@ on:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest  # Use the default GitHub runner
-
-    container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image
-      env:
-        HOME: /root  # Set the $HOME environment variable to /root
+    runs-on: ubuntu-latest
 
     steps:
+      - name: Check Docker version
+        run: docker --version
+
+      - name: Clean up resources from previous jobs
+        run: docker system prune -f
+
+      - name: Create local container network
+        run: docker network create github_network
+
+      - name: Start job container
+        run: |
+          docker pull archlinux:latest
+          docker run --network github_network --name job_container -d archlinux:latest tail -f /dev/null
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -30,40 +39,61 @@ jobs:
 
   build:
     needs: setup
-    runs-on: ubuntu-latest  # Use the default GitHub runner
+    runs-on: ubuntu-latest
 
     container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image
+      image: archlinux:latest
       env:
-        HOME: /root  # Set the $HOME environment variable to /root
+        HOME: /github/home
 
     steps:
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: Build
         run: cargo build --verbose
 
   test:
     needs: build
-    runs-on: ubuntu-latest  # Use the default GitHub runner
+    runs-on: ubuntu-latest
 
     container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image
+      image: archlinux:latest
       env:
-        HOME: /root  # Set the $HOME environment variable to /root
+        HOME: /github/home
 
     steps:
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: Test
         run: cargo test --verbose
 
   lint:
     needs: test
-    runs-on: ubuntu-latest  # Use the default GitHub runner
+    runs-on: ubuntu-latest
 
     container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image
+      image: archlinux:latest
       env:
-        HOME: /root  # Set the $HOME environment variable to /root
+        HOME: /github/home
 
     steps:
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: Clippy
         run: cargo clippy --verbose -- -D warnings
 
@@ -72,14 +102,21 @@ jobs:
 
   audit:
     needs: lint
-    runs-on: ubuntu-latest  # Use the default GitHub runner
+    runs-on: ubuntu-latest
 
     container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image
+      image: archlinux:latest
       env:
-        HOME: /root  # Set the $HOME environment variable to /root
+        HOME: /github/home
 
     steps:
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
       - name: Install cargo-audit
         run: cargo install cargo-audit
 
