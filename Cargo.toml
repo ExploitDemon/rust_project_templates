@@ -1,0 +1,9 @@
+[package]
+name = "PROJECT_NAME"
+version = "0.1.0"
+authors = ["Your Name <your.email@example.com>"]
+edition = "2021"
+description = "DESCRIPTION"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
