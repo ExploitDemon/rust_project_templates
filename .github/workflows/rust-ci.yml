@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest  # Use the default GitHub runner
 
     container:
-      image: archlinux:latest  # Use the latest Arch Linux Docker image\
+      image: archlinux:latest  # Use the latest Arch Linux Docker image
       env:
         HOME: /root  # Set the $HOME environment variable to /root
 
@@ -27,9 +27,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
 
   build:
     needs: setup
@@ -69,15 +66,9 @@ jobs:
     steps:
       - name: Clippy
         run: cargo clippy --verbose -- -D warnings
-        env:
-          # Assuming .clippy.toml is in the root of your repository
-          CARGO_HOME: ${{ github.workspace }}
 
       - name: Rustfmt
         run: cargo fmt --all -- --check
-        env:
-          # Assuming .rustfmt.toml is in the root of your repository
-          CARGO_HOME: ${{ github.workspace }}
 
   audit:
     needs: lint
@@ -89,5 +80,8 @@ jobs:
         HOME: /root  # Set the $HOME environment variable to /root
 
     steps:
-      - name: Audit
-        run: cargo audit --verbose
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Audit dependencies
+        run: cargo audit
