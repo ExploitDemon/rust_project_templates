@@ -9,37 +9,9 @@ on:
       - main
 
 jobs:
-  setup:
+  build_and_test:
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Check Docker version
-        run: docker --version
-
-      - name: Clean up resources from previous jobs
-        run: docker system prune -f
-
-      - name: Create local container network
-        run: docker network create github_network
-
-      - name: Start job container
-        run: |
-          docker pull archlinux:latest
-          docker run --network github_network --name job_container -d archlinux:latest tail -f /dev/null
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
+    timeout-minutes: 60  # Set a timeout
 
     container:
       image: archlinux:latest
@@ -47,78 +19,53 @@ jobs:
         HOME: /github/home
 
     steps:
+      - name: Setup system
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel
+
+      - name: Checkout code
+        uses: actions/checkout@v3  # Update to v3
+
+      - name: Add Cargo bin to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: actions-rs/toolchain@v1  # Update to the latest version that supports Node 16
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: Build
         run: cargo build --verbose
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-
-    container:
-      image: archlinux:latest
-      env:
-        HOME: /github/home
-
-    steps:
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+        working-directory: ./
 
       - name: Test
         run: cargo test --verbose
+        working-directory: ./
 
-  lint:
-    needs: test
-    runs-on: ubuntu-latest
-
-    container:
-      image: archlinux:latest
-      env:
-        HOME: /github/home
-
-    steps:
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Install Clippy
+        run: rustup component add clippy
 
       - name: Clippy
         run: cargo clippy --verbose -- -D warnings
 
+      - name: Install Rustfmt
+        run: rustup component add rustfmt
+
       - name: Rustfmt
         run: cargo fmt --all -- --check
-
-  audit:
-    needs: lint
-    runs-on: ubuntu-latest
-
-    container:
-      image: archlinux:latest
-      env:
-        HOME: /github/home
-
-    steps:
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
 
       - name: Install cargo-audit
         run: cargo install cargo-audit
 
       - name: Audit dependencies
         run: cargo audit
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4  # Update to the latest version that supports Node 16
+        with:
+          name: build-artifact
+          path: ./target
